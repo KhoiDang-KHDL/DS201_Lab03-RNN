@@ -5,9 +5,7 @@ from torch.nn.utils.rnn import pad_sequence
 import json
 import os
 
-# --- HÀM ĐỌC DỮ LIỆU THÔNG MINH ---
 def load_data_smart(filepath):
-    """Đọc được cả file JSON thường và JSON Lines"""
     data = []
     try:
         with open(filepath, 'r', encoding='utf-8') as f:
@@ -31,8 +29,8 @@ def collate_fn(items: list) -> dict:
     input_ids = [item['input_ids'] for item in items]
     label_ids = [item['label'] for item in items]
     
-    # QUAN TRỌNG: Padding value cho cả Input và Label đều là 0
-    # Để tránh lỗi CUDA khi đưa vào Embedding layer
+    # Padding value cho cả Input và Label đều là 0
+    # -> Để tránh lỗi CUDA khi đưa vào Embedding layer
     padded_input_ids = pad_sequence(input_ids, batch_first=True, padding_value=0)
     padded_label_ids = pad_sequence(label_ids, batch_first=True, padding_value=0)
     
@@ -71,19 +69,19 @@ class Vocab:
         if not files_found:
             print("CẢNH BÁO: Không tìm thấy file .json nào!")
 
-        # 1. Xây dựng từ điển TỪ (Words)
+        # 1. Xây dựng từ điển 
         self.bos = "<s>"
         self.pad = "<p>"
         self.unk = "<unk>"
         
         self.w2i = {word: idx for idx, word in enumerate(all_words, start=3)}
-        self.w2i[self.pad] = 0  # Pad ID = 0
+        self.w2i[self.pad] = 0  
         self.w2i[self.bos] = 1
         self.w2i[self.unk] = 2
         
         self.i2w = {idx: word for word, idx in self.w2i.items()}
         
-        # 2. Xây dựng từ điển NHÃN (Tags) - SỬA LẠI ĐỂ TRÁNH LỖI CUDA
+        # 2. Xây dựng từ điển NHÃN (Tags) 
         # Tag <pad> bắt buộc phải là 0 để khớp với padding_value trong collate_fn
         self.tag_pad = "<pad>"
         self.tag2i = {self.tag_pad: 0}
@@ -141,7 +139,7 @@ class PhoNER(Dataset):
         input_ids = self.vocab.encode_words(words)
         label_ids = self.vocab.encode_tags(tags)
         
-        # Cắt nếu độ dài không khớp (phòng hờ dữ liệu lỗi)
+        # Cắt nếu độ dài không đồng nhất 
         min_len = min(len(input_ids), len(label_ids))
         return {
             'input_ids': input_ids[:min_len],
