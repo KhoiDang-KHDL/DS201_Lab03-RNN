@@ -93,11 +93,10 @@ class LSTMModel(nn.Module):
         # h_n chứa trạng thái cuối của cả chiều thuận và chiều nghịch
         # Cấu trúc h_n: [layer_1_fwd, layer_1_bwd, ..., layer_n_fwd, layer_n_bwd]
         
-        # Lấy layer cuối cùng, chiều thuận và chiều nghịch ghép lại
+        # Ghép 2 chiều lại với nhau
         feature_fwd = h_n[-2, :, :]
         feature_bwd = h_n[-1, :, :]
         
-        # Ghép lại: [Batch, Hidden * 2]
         features = torch.cat((feature_fwd, feature_bwd), dim=1)
         
         features = self.dropout(features)
