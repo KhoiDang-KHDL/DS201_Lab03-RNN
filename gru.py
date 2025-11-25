@@ -5,7 +5,7 @@ class GRUModel(nn.Module):
     def __init__(
         self, 
         vocab_size: int, 
-        embedding_dim: int, # Tách riêng embedding_dim cho linh hoạt
+        embedding_dim: int,
         hidden_size: int, 
         n_layers: int, 
         n_labels: int, 
@@ -25,7 +25,7 @@ class GRUModel(nn.Module):
             hidden_size=hidden_size,
             batch_first=True,
             num_layers=n_layers,
-            bidirectional=True, # NÊN DÙNG: Đọc 2 chiều
+            bidirectional=True, # Đọc 2 chiều
             dropout=dropout if n_layers > 1 else 0
         )
         
@@ -43,10 +43,10 @@ class GRUModel(nn.Module):
         
         # 2. GRU
         # output: chứa features của toàn bộ các bước thời gian
-        # h_n: chứa trạng thái ẩn cuối cùng của các lớp (quan trọng nhất)
+        # h_n: chứa trạng thái ẩn cuối cùng của các lớp 
         output, h_n = self.gru(embedded_feats)
         
-        # 3. Lấy thông tin tóm tắt câu (Context Vector)
+        # 3. Lấy (Context Vector)
         # h_n có kích thước: [num_layers * num_directions, batch, hidden_size]
         
         # Lấy hidden state của lớp cuối cùng (last layer)
@@ -54,7 +54,7 @@ class GRUModel(nn.Module):
         feature_fwd = h_n[-2, :, :]
         feature_bwd = h_n[-1, :, :]
         
-        # Ghép 2 vector này lại
+        # Ghép 2 vector
         context_vector = torch.cat((feature_fwd, feature_bwd), dim=1)
         
         # 4. Phân lớp
