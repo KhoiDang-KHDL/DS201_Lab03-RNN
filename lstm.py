@@ -1,58 +1,15 @@
 import torch
 from torch import nn
 
-class LSTMModel (nn.Module):
-    def __init__ (
-        self,
-        vocab_size: int,
-        hidden_size: int,
-        n_layers: int,
-        n_labels: int,
-        padding_idx: int = 0
-    ):
-        super().__init__()
-        
-        self.embedding = nn.Embedding(
-            num_embeddings=vocab_size,
-            embedding_dim=hidden_size,
-            padding_idx=padding_idx
-        )
-        
-        self.lstm = nn.LSTM(
-            input_size=hidden_size,
-            hidden_size=hidden_size,
-            batch_first=True,
-            num_layers=n_layers,
-        )
-        
-        self.classifier = nn.Linear(
-            in_features=hidden_size,
-            out_features=n_labels
-        )
-
-    def forward (self, input_ids: torch.Tensor):
-        embedded_feats = self.embedding(input_ids)
-        features, _ = self.lstm(embedded_feats)
-        
-        features = features[:, -1]  # Take the last output of LSTM
-        logits = self.classifier(features)
-        
-        return logits
-    
-    
-'''
-import torch
-from torch import nn
-
 class LSTMModel(nn.Module):
     def __init__(
         self, 
         vocab_size: int, 
-        embedding_dim: int,  # Tách riêng embedding_dim
+        embedding_dim: int, 
         hidden_size: int, 
         n_layers: int, 
         n_labels: int, 
-        dropout: float = 0.2, # Thêm dropout
+        dropout: float = 0.2, 
         padding_idx: int = 0
     ):
         super().__init__()
@@ -68,7 +25,7 @@ class LSTMModel(nn.Module):
             hidden_size=hidden_size,
             batch_first=True,
             num_layers=n_layers,
-            bidirectional=True, # Nên dùng 2 chiều cho bài toán phân loại
+            bidirectional=True, 
             dropout=dropout if n_layers > 1 else 0
         )
         
@@ -93,14 +50,14 @@ class LSTMModel(nn.Module):
         # h_n chứa trạng thái cuối của cả chiều thuận và chiều nghịch
         # Cấu trúc h_n: [layer_1_fwd, layer_1_bwd, ..., layer_n_fwd, layer_n_bwd]
         
-        # Ghép 2 chiều lại với nhau
+        # Lấy layer cuối cùng, chiều thuận và chiều nghịch ghép lại
         feature_fwd = h_n[-2, :, :]
         feature_bwd = h_n[-1, :, :]
         
+        # Ghép lại: [Batch, Hidden * 2]
         features = torch.cat((feature_fwd, feature_bwd), dim=1)
         
         features = self.dropout(features)
         logits = self.classifier(features)
         
         return logits
-    '''
